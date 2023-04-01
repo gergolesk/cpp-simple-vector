@@ -31,9 +31,6 @@ public:
         if (this == &rhs) {
             return *this;
         }
-
-        //raw_ptr_ = rhs.raw_ptr_;
-        //rhs.raw_ptr_ = nullptr;
         raw_ptr_ = std::exchange(rhs.raw_ptr_, nullptr);
         return *this;
     }
