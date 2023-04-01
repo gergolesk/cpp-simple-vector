@@ -39,7 +39,8 @@ public:
     explicit SimpleVector(size_t size) : items_(size) {
         size_ = size;
         capacity_ = size;
-        std::fill(begin(), end(), Type());
+        //std::fill(begin(), end(), Type());
+        std::generate(begin(), end(), []() { return Type(); });
     }
 
     // Создаёт вектор из size элементов, инициализированных значением value
@@ -90,11 +91,13 @@ public:
 
     // Возвращает ссылку на элемент с индексом index
     Type& operator[](size_t index) noexcept {
+        assert(index <= size_);
         return items_[index];
     }
 
     // Возвращает константную ссылку на элемент с индексом index
     const Type& operator[](size_t index) const noexcept {
+        assert(index <= size_);
         return items_[index];
     }
 
@@ -149,7 +152,7 @@ public:
     // Возвращает итератор на начало массива
     // Для пустого массива может быть равен (или не равен) nullptr
     Iterator begin() noexcept {
-        return &items_[0];
+        return items_.Get();
     }
 
     // Возвращает итератор на элемент, следующий за последним
@@ -161,7 +164,7 @@ public:
     // Возвращает константный итератор на начало массива
     // Для пустого массива может быть равен (или не равен) nullptr
     ConstIterator begin() const noexcept {
-        return &items_[0];
+        return items_.Get();
     }
 
     // Возвращает итератор на элемент, следующий за последним
@@ -173,7 +176,7 @@ public:
     // Возвращает константный итератор на начало массива
     // Для пустого массива может быть равен (или не равен) nullptr
     ConstIterator cbegin() const noexcept {
-        return &items_[0];
+        return items_.Get();
     }
 
     // Возвращает итератор на элемент, следующий за последним
@@ -183,8 +186,10 @@ public:
     }
 
     SimpleVector& operator=(const SimpleVector& rhs) {
-        SimpleVector<Type> tmp(rhs);
-        this->swap(tmp);
+        if (this != &rhs) {
+            SimpleVector<Type> tmp(rhs);
+            this->swap(tmp);
+        }        
         return *this;
     }
 
@@ -195,7 +200,7 @@ public:
             items_[size_] = item;
         }
         else {
-            auto new_capacity = std::max(size_t(1), 2 * capacity_); //защита, если capacity_=0
+            size_t new_capacity = std::max(size_t(1), 2 * capacity_); //защита, если capacity_=0
             ArrayPtr<Type> arr_ptr(new_capacity);
             std::copy(&items_[0], &items_[size_], &arr_ptr[0]);
             arr_ptr[size_] = item;
@@ -210,7 +215,7 @@ public:
             items_[size_] = std::move(item);
         }
         else {
-            auto new_capacity = std::max(size_t(1), 2 * capacity_); //защита, если capacity_=0
+            size_t new_capacity = std::max(size_t(1), 2 * capacity_); //защита, если capacity_=0
             ArrayPtr<Type> arr_ptr(new_capacity);
             std::move(&items_[0], &items_[size_], &arr_ptr[0]);
             arr_ptr[size_] = std::move(item);
@@ -235,7 +240,7 @@ public:
             items_[pos_element] = value;
         }
         else {
-            auto new_capacity = std::max(size_t(1), 2 * capacity_); //защита, если capacity_=0
+            size_t new_capacity = std::max(size_t(1), 2 * capacity_); //защита, если capacity_=0
             ArrayPtr<Type> arr_ptr(new_capacity);
             std::copy(&items_[0], &items_[pos_element], &arr_ptr[0]);
             std::copy_backward(pos, cend(), &arr_ptr[(size_ + 1)]);
@@ -287,9 +292,7 @@ public:
 
     // "Удаляет" последний элемент вектора. Вектор не должен быть пустым
     void PopBack() noexcept {
-        if (IsEmpty()) {
-            return;
-        }
+        assert(!IsEmpty());
         auto it_pop = begin();
         std::advance(it_pop, size_ - 1);
         Erase(it_pop);
