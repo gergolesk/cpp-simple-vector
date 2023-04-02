@@ -91,13 +91,13 @@ public:
 
     // Возвращает ссылку на элемент с индексом index
     Type& operator[](size_t index) noexcept {
-        assert(index <= size_);
+        assert(index < size_);
         return items_[index];
     }
 
     // Возвращает константную ссылку на элемент с индексом index
     const Type& operator[](size_t index) const noexcept {
-        assert(index <= size_);
+        assert(index < size_);
         return items_[index];
     }
 
@@ -158,7 +158,7 @@ public:
     // Возвращает итератор на элемент, следующий за последним
     // Для пустого массива может быть равен (или не равен) nullptr
     Iterator end() noexcept {
-        return &items_[size_];
+        return (items_.Get() + size_);
     }
 
     // Возвращает константный итератор на начало массива
@@ -170,7 +170,7 @@ public:
     // Возвращает итератор на элемент, следующий за последним
     // Для пустого массива может быть равен (или не равен) nullptr
     ConstIterator end() const noexcept {
-        return &items_[size_];
+        return (items_.Get() + size_);
     }
 
     // Возвращает константный итератор на начало массива
@@ -182,7 +182,7 @@ public:
     // Возвращает итератор на элемент, следующий за последним
     // Для пустого массива может быть равен (или не равен) nullptr
     ConstIterator cend() const noexcept {
-        return &items_[size_];
+        return (items_.Get() + size_);;
     }
 
     SimpleVector& operator=(const SimpleVector& rhs) {
